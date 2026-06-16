@@ -1,7 +1,7 @@
 import { AudioLines } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-type DemoPhase = 'initial' | 'aiCursor' | 'cableRemoving' | 'cableRemoved' | 'processing' | 'completed';
+type DemoPhase = 'initial' | 'aiCursor' | 'cableRemoving' | 'cableRemoved' | 'vasePrompt' | 'processing' | 'completed';
 
 type Point = {
   x: number;
@@ -58,9 +58,10 @@ declare global {
 }
 
 const beforeSceneUrl = new URL('./assets/scene-before.png', import.meta.url).href;
+const noCableSceneUrl = new URL('./assets/scene-no-cable.png', import.meta.url).href;
 const afterSceneUrl = new URL('./assets/scene-after.png', import.meta.url).href;
 
-const phaseOrder: DemoPhase[] = ['initial', 'aiCursor', 'cableRemoving', 'cableRemoved', 'processing', 'completed'];
+const phaseOrder: DemoPhase[] = ['initial', 'aiCursor', 'cableRemoving', 'cableRemoved', 'vasePrompt', 'processing', 'completed'];
 
 const remoteAIWaterBase =
   'https://raw.githubusercontent.com/Pingo-od/ai-water-interactions/main/ai-water-interactions';
@@ -478,6 +479,12 @@ export function App() {
   }, [phase, setGuidedPhase]);
 
   useEffect(() => {
+    if (phase !== 'vasePrompt') return undefined;
+    const timer = window.setTimeout(() => setGuidedPhase('processing'), 1650);
+    return () => window.clearTimeout(timer);
+  }, [phase, setGuidedPhase]);
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const index = Number(event.key) - 1;
       if (index >= 0 && index < phaseOrder.length) {
@@ -556,14 +563,17 @@ export function App() {
     event.stopPropagation();
     if (phase !== 'cableRemoved') return;
     setCursorPosition({ x: event.clientX, y: event.clientY });
-    setGuidedPhase('processing');
+    setGuidedPhase('vasePrompt');
   }, [phase, setGuidedPhase]);
 
   const showWaterState = phase !== 'initial';
   const showLocalCursor = showWaterState && phase !== 'completed';
   const showBeforeScene = phase !== 'completed';
   const showAfterScene = phase === 'processing' || phase === 'completed';
-  const showCableCover = phase === 'cableRemoving' || phase === 'cableRemoved' || phase === 'processing';
+  const showCableCover =
+    phase === 'cableRemoving';
+  const baseSceneUrl =
+    phase === 'cableRemoved' || phase === 'vasePrompt' || phase === 'processing' ? noCableSceneUrl : beforeSceneUrl;
 
   return (
     <main className={`stage phase-${phase}`} onMouseMove={handlePointerMove} onPointerMove={handlePointerMove}>
@@ -578,12 +588,13 @@ export function App() {
       )}
       <section className="photo-frame" aria-label="水相修图演示">
         <div className="photo-clip">
-          {showBeforeScene && <img className="scene-img scene-before" src={beforeSceneUrl} alt="" draggable={false} />}
+          {showBeforeScene && <img className="scene-img scene-before" src={baseSceneUrl} alt="" draggable={false} />}
           {showAfterScene && <img className="scene-img scene-after" src={afterSceneUrl} alt="" draggable={false} />}
 
           {showCableCover && <CableRemovalCover />}
 
           {phase === 'cableRemoving' && <BreathingPoint kind="cable" />}
+          {phase === 'vasePrompt' && <BreathingPoint kind="vase" />}
 
           {phase === 'processing' && (
             <>
@@ -591,6 +602,8 @@ export function App() {
               <ConfettiBurst />
             </>
           )}
+
+          {phase === 'vasePrompt' && <VoiceInputBubble key="vasePrompt" phase="vasePrompt" text="这里加个花瓶" />}
 
           <button
             className="hotspot hotspot-cable"

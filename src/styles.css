@@ -42,6 +42,7 @@ button {
 .stage.phase-aiCursor,
 .stage.phase-cableRemoving,
 .stage.phase-cableRemoved,
+.stage.phase-vasePrompt,
 .stage.phase-processing {
   cursor: none;
 }
@@ -49,6 +50,7 @@ button {
 .stage.phase-aiCursor *,
 .stage.phase-cableRemoving *,
 .stage.phase-cableRemoved *,
+.stage.phase-vasePrompt *,
 .stage.phase-processing * {
   cursor: none !important;
 }
@@ -202,6 +204,7 @@ button {
 
 .phase-initial .hotspot,
 .phase-cableRemoving .hotspot,
+.phase-vasePrompt .hotspot,
 .phase-processing .hotspot,
 .phase-completed .hotspot {
   pointer-events: none;
@@ -251,32 +254,36 @@ button {
 .cable-removal-cover {
   position: absolute;
   z-index: 4;
-  left: 51.6%;
-  top: 68.3%;
-  width: 22.8%;
-  height: 16.4%;
-  border-radius: 52%;
+  left: 46.6%;
+  top: 64.6%;
+  width: 35.2%;
+  height: 23.2%;
+  border-radius: 56%;
   pointer-events: none;
   opacity: 0;
-  transform: rotate(-4deg) scale(0.96);
+  transform: rotate(-3.5deg) scale(0.96);
   background:
-    radial-gradient(ellipse at 22% 50%, rgba(248, 234, 214, 0.72) 0 19%, rgba(238, 206, 176, 0.5) 30%, transparent 47%),
-    radial-gradient(ellipse at 53% 56%, rgba(205, 160, 116, 0.58) 0 34%, rgba(176, 128, 87, 0.42) 58%, transparent 74%),
-    linear-gradient(104deg, rgba(225, 184, 139, 0.52), rgba(187, 133, 88, 0.42) 54%, rgba(232, 197, 158, 0.34));
-  filter: blur(1.8px) saturate(0.96);
+    radial-gradient(ellipse at 16% 51%, rgba(252, 230, 199, 0.96) 0 18%, rgba(229, 191, 150, 0.88) 34%, rgba(204, 158, 111, 0.72) 54%, transparent 76%),
+    radial-gradient(ellipse at 56% 56%, rgba(220, 175, 127, 0.96) 0 38%, rgba(187, 133, 87, 0.86) 64%, transparent 82%),
+    radial-gradient(ellipse at 89% 50%, rgba(232, 196, 155, 0.86) 0 32%, rgba(187, 132, 86, 0.72) 58%, transparent 80%),
+    linear-gradient(103deg, rgba(238, 203, 165, 0.9), rgba(190, 134, 87, 0.86) 54%, rgba(231, 195, 156, 0.78));
+  filter: blur(2.4px) saturate(0.98);
   box-shadow:
-    inset 0 10px 24px rgba(255, 236, 210, 0.24),
-    inset 0 -12px 26px rgba(126, 82, 45, 0.16);
+    0 0 20px rgba(205, 153, 103, 0.22),
+    inset 0 14px 30px rgba(255, 238, 212, 0.3),
+    inset 0 -18px 34px rgba(126, 82, 45, 0.2);
   mix-blend-mode: normal;
 }
 
 .cable-removal-cover::after {
   content: "";
   position: absolute;
-  inset: 16% 6% 22% 3%;
+  inset: 15% 5% 20% 4%;
   border-radius: inherit;
-  background: linear-gradient(96deg, rgba(255, 241, 220, 0.38), rgba(200, 142, 92, 0.1) 62%, transparent);
-  filter: blur(5px);
+  background:
+    linear-gradient(96deg, rgba(255, 241, 220, 0.5), rgba(215, 159, 108, 0.2) 62%, transparent),
+    radial-gradient(ellipse at 34% 55%, rgba(255, 235, 205, 0.3), transparent 62%);
+  filter: blur(7px);
 }
 
 .phase-cableRemoving .cable-removal-cover {
@@ -284,9 +291,10 @@ button {
 }
 
 .phase-cableRemoved .cable-removal-cover,
+.phase-vasePrompt .cable-removal-cover,
 .phase-processing .cable-removal-cover {
   opacity: 1;
-  transform: rotate(-4deg) scale(1);
+  transform: rotate(-3.5deg) scale(1);
 }
 
 .voice-input-bubble {
