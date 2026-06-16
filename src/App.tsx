@@ -1,7 +1,7 @@
 import { AudioLines } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-type DemoPhase = 'initial' | 'aiCursor' | 'removePrompt' | 'vasePrompt' | 'processing' | 'completed';
+type DemoPhase = 'initial' | 'aiCursor' | 'cableRemoving' | 'cableRemoved' | 'processing' | 'completed';
 
 type Point = {
   x: number;
@@ -60,7 +60,7 @@ declare global {
 const beforeSceneUrl = new URL('./assets/scene-before.png', import.meta.url).href;
 const afterSceneUrl = new URL('./assets/scene-after.png', import.meta.url).href;
 
-const phaseOrder: DemoPhase[] = ['initial', 'aiCursor', 'removePrompt', 'vasePrompt', 'processing', 'completed'];
+const phaseOrder: DemoPhase[] = ['initial', 'aiCursor', 'cableRemoving', 'cableRemoved', 'processing', 'completed'];
 
 const remoteAIWaterBase =
   'https://raw.githubusercontent.com/Pingo-od/ai-water-interactions/main/ai-water-interactions';
@@ -229,6 +229,10 @@ function BreathingPoint({ kind }: { kind: 'cable' | 'vase' }) {
   );
 }
 
+function CableRemovalCover() {
+  return <div className="cable-removal-cover" aria-hidden="true" />;
+}
+
 function shouldRenderMosaicTile(kind: 'cable' | 'vase', x: number, y: number, columns: number, rows: number) {
   const px = columns <= 1 ? 0.5 : x / (columns - 1);
   const py = rows <= 1 ? 0.5 : y / (rows - 1);
@@ -370,7 +374,6 @@ function MosaicRegion({ kind }: { kind: 'cable' | 'vase' }) {
 function MosaicSpreadEffect() {
   return (
     <div className="mosaic-spread-effect" aria-hidden="true">
-      <MosaicRegion kind="cable" />
       <MosaicRegion kind="vase" />
     </div>
   );
@@ -469,6 +472,12 @@ export function App() {
   }, [phase, setGuidedPhase]);
 
   useEffect(() => {
+    if (phase !== 'cableRemoving') return undefined;
+    const timer = window.setTimeout(() => setGuidedPhase('cableRemoved'), 2100);
+    return () => window.clearTimeout(timer);
+  }, [phase, setGuidedPhase]);
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const index = Number(event.key) - 1;
       if (index >= 0 && index < phaseOrder.length) {
@@ -538,31 +547,23 @@ export function App() {
 
   const handleCableClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
+    if (phase !== 'aiCursor') return;
     setCursorPosition({ x: event.clientX, y: event.clientY });
-    setGuidedPhase('removePrompt');
-  }, [setGuidedPhase]);
+    setGuidedPhase('cableRemoving');
+  }, [phase, setGuidedPhase]);
 
   const handleVaseClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    if (phase !== 'removePrompt' && phase !== 'vasePrompt') return;
+    if (phase !== 'cableRemoved') return;
     setCursorPosition({ x: event.clientX, y: event.clientY });
-    if (phase === 'vasePrompt') {
-      setGuidedPhase('processing');
-      return;
-    }
-    setGuidedPhase('vasePrompt');
-  }, [phase, setGuidedPhase]);
-
-  const handlePhotoClick = useCallback(() => {
-    if (phase === 'vasePrompt') {
-      setGuidedPhase('processing');
-    }
+    setGuidedPhase('processing');
   }, [phase, setGuidedPhase]);
 
   const showWaterState = phase !== 'initial';
   const showLocalCursor = showWaterState && phase !== 'completed';
   const showBeforeScene = phase !== 'completed';
   const showAfterScene = phase === 'processing' || phase === 'completed';
+  const showCableCover = phase === 'cableRemoving' || phase === 'cableRemoved' || phase === 'processing';
 
   return (
     <main className={`stage phase-${phase}`} onMouseMove={handlePointerMove} onPointerMove={handlePointerMove}>
@@ -575,13 +576,14 @@ export function App() {
           <span className="aura-edge aura-left" />
         </div>
       )}
-      <section className="photo-frame" aria-label="水相修图演示" onClick={handlePhotoClick}>
+      <section className="photo-frame" aria-label="水相修图演示">
         <div className="photo-clip">
           {showBeforeScene && <img className="scene-img scene-before" src={beforeSceneUrl} alt="" draggable={false} />}
           {showAfterScene && <img className="scene-img scene-after" src={afterSceneUrl} alt="" draggable={false} />}
 
-          {(phase === 'removePrompt' || phase === 'vasePrompt') && <BreathingPoint kind="cable" />}
-          {phase === 'vasePrompt' && <BreathingPoint kind="vase" />}
+          {showCableCover && <CableRemovalCover />}
+
+          {phase === 'cableRemoving' && <BreathingPoint kind="cable" />}
 
           {phase === 'processing' && (
             <>
@@ -589,9 +591,6 @@ export function App() {
               <ConfettiBurst />
             </>
           )}
-
-          {phase === 'removePrompt' && <VoiceInputBubble key="removePrompt" phase="removePrompt" text="把这个去掉" />}
-          {phase === 'vasePrompt' && <VoiceInputBubble key="vasePrompt" phase="vasePrompt" text="这里加个花瓶" />}
 
           <button
             className="hotspot hotspot-cable"

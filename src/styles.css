@@ -40,15 +40,15 @@ button {
 }
 
 .stage.phase-aiCursor,
-.stage.phase-removePrompt,
-.stage.phase-vasePrompt,
+.stage.phase-cableRemoving,
+.stage.phase-cableRemoved,
 .stage.phase-processing {
   cursor: none;
 }
 
 .stage.phase-aiCursor *,
-.stage.phase-removePrompt *,
-.stage.phase-vasePrompt *,
+.stage.phase-cableRemoving *,
+.stage.phase-cableRemoved *,
 .stage.phase-processing * {
   cursor: none !important;
 }
@@ -201,8 +201,13 @@ button {
 }
 
 .phase-initial .hotspot,
+.phase-cableRemoving .hotspot,
 .phase-processing .hotspot,
 .phase-completed .hotspot {
+  pointer-events: none;
+}
+
+.phase-cableRemoved .hotspot-cable {
   pointer-events: none;
 }
 
@@ -241,6 +246,47 @@ button {
 .breathing-point-vase {
   width: 96px;
   height: 96px;
+}
+
+.cable-removal-cover {
+  position: absolute;
+  z-index: 4;
+  left: 51.6%;
+  top: 68.3%;
+  width: 22.8%;
+  height: 16.4%;
+  border-radius: 52%;
+  pointer-events: none;
+  opacity: 0;
+  transform: rotate(-4deg) scale(0.96);
+  background:
+    radial-gradient(ellipse at 22% 50%, rgba(248, 234, 214, 0.72) 0 19%, rgba(238, 206, 176, 0.5) 30%, transparent 47%),
+    radial-gradient(ellipse at 53% 56%, rgba(205, 160, 116, 0.58) 0 34%, rgba(176, 128, 87, 0.42) 58%, transparent 74%),
+    linear-gradient(104deg, rgba(225, 184, 139, 0.52), rgba(187, 133, 88, 0.42) 54%, rgba(232, 197, 158, 0.34));
+  filter: blur(1.8px) saturate(0.96);
+  box-shadow:
+    inset 0 10px 24px rgba(255, 236, 210, 0.24),
+    inset 0 -12px 26px rgba(126, 82, 45, 0.16);
+  mix-blend-mode: normal;
+}
+
+.cable-removal-cover::after {
+  content: "";
+  position: absolute;
+  inset: 16% 6% 22% 3%;
+  border-radius: inherit;
+  background: linear-gradient(96deg, rgba(255, 241, 220, 0.38), rgba(200, 142, 92, 0.1) 62%, transparent);
+  filter: blur(5px);
+}
+
+.phase-cableRemoving .cable-removal-cover {
+  animation: cableCoverIn 520ms cubic-bezier(0.22, 0.72, 0.24, 1) 1580ms forwards;
+}
+
+.phase-cableRemoved .cable-removal-cover,
+.phase-processing .cable-removal-cover {
+  opacity: 1;
+  transform: rotate(-4deg) scale(1);
 }
 
 .voice-input-bubble {
@@ -520,6 +566,23 @@ button {
     opacity: 1;
     filter: blur(1px);
     transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@keyframes cableCoverIn {
+  0% {
+    opacity: 0;
+    filter: blur(8px) saturate(0.9);
+    transform: rotate(-4deg) scale(0.86);
+  }
+  58% {
+    opacity: 0.92;
+    filter: blur(3px) saturate(0.95);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(1.8px) saturate(0.96);
+    transform: rotate(-4deg) scale(1);
   }
 }
 
