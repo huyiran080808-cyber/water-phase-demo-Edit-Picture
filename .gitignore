@@ -4,5 +4,6 @@ dist
 .env
 .vercel
 .vite-dev.log
+.vite
 logs
 references
